@@ -1,98 +1,91 @@
 #include "achtung.h"
 
-void print_grid() {
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            if (grid[i][j] == MINE) {
+void print_grid(Gamedata gamedata) {
+    for (int i = 0; i < gamedata.rows; i++) {
+        for (int j = 0; j < gamedata.cols; j++) {
+            if (gamedata.grid[i][j] == MINE) {
                 printf("X");
             } else {
-                printf("%d", grid[i][j]);
+                printf("%d", gamedata.grid[i][j]);
             }
         }
         printf("\n");
     }
 }
 
-void init_grid() {
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            grid[i][j] = 0;
+void init_grid(Gamedata* gamedata) {
+    for (int i = 0; i < gamedata->rows; i++) {
+        for (int j = 0; j < gamedata->cols; j++) {
+            gamedata->grid[i][j] = 0;
         }
     }
-    lay_mines();
-}
-
-void lay_mines() {
+    printf("Zeroed data\n");
     srand(time(NULL));
-    int n = rows * cols;
-    int samples = mine_count;
+    int n = gamedata->rows * gamedata->cols;
+    int samples = gamedata->mine_count;
 
     int i, j = 0;
     while (samples > 0) {
-        while (grid[i][j] != 0) {
-            j = (j+1) % cols;
-            i = (!j) ? (i+1) % rows : i;
+        while (gamedata->grid[i][j] != 0) {
+            j = (j+1) % gamedata->cols;
+            i = (!j) ? (i+1) % gamedata->rows : i;
         }
         int p = rand() % n;
         if (!p) {
-            grid[i][j] = MINE;
+            gamedata->grid[i][j] = MINE;
             n--;
             samples--;
         } else {
-            j = (j+1) % cols;
-            i = (!j) ? (i+1) % rows : i;
+            j = (j+1) % gamedata->cols;
+            i = (!j) ? (i+1) % gamedata->rows : i;
         }
     }
 }
 
-void set_neighbors() {
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            if (grid[i][j] == MINE) continue;
+void lay_mines(Gamedata* gamedata) {
+
+}
+
+void set_neighbors(Gamedata* gamedata) {
+    for (int i = 0; i < gamedata->rows; i++) {
+        for (int j = 0; j < gamedata->cols; j++) {
+            if (gamedata->grid[i][j] == MINE) continue;
             int count = 0;
             for (int k = i-1; k <= i+1; k++) {
                 for (int l = j-1; l <= j+1; l++) {
-                    if (k < 0 || l < 0 || k >= rows || l >= cols) continue;
-                    if (grid[k][l] == MINE) count++;
+                    if (k < 0 || l < 0 || k >= gamedata->rows || l >= gamedata->cols) continue;
+                    if (gamedata->grid[k][l] == MINE) count++;
                 }
             }
-            grid[i][j] = count;
+            gamedata->grid[i][j] = count;
         }
     }
 }
 
-int malloc_grid(int _rows, int _cols, float density) {
-    rows = _rows;
-    cols = _cols;
-    mine_count = (int) (rows * cols * density);
-
-    grid = (int**) malloc(rows * sizeof(int*));
-    if (grid == NULL) {
-        printf("Failed to allocate memory for grid\n");
-        free(grid);
-        return 1;
-    }
-
+int malloc_grid(Gamedata* gamedata, int rows, int cols, float density) {
+    gamedata->grid = (int**) malloc(rows*sizeof(int*));
+    if (gamedata->grid == NULL) return 1;
     for (int i = 0; i < rows; i++) {
-        grid[i] = (int*) calloc(cols, sizeof(int));
-        if (grid[i] == NULL) {
-            printf("Failed to allocate memory for grid row\n");
-            for (int j = 0; j < i; j++) {
-                free(grid[j]);
+        gamedata->grid[i] = (int*) calloc(cols, sizeof(int));
+        if (gamedata->grid[i] == NULL) {
+            for (int ii = i-1; i >= 0; i--) {
+                free(gamedata->grid[ii]);
             }
-            free(grid);
-            free(grid);
+            free(gamedata->grid);
+            gamedata->grid = NULL;
             return 1;
         }
     }
+    gamedata->rows = rows;
+    gamedata->cols = cols;
+    gamedata->mine_count = (int) (density * rows * cols);
 
     return 0;
 }
 
-void free_grid() {
-    for (int i = 0; i < rows; i++) {
-        free(grid[i]);
+void free_grid(Gamedata* gamedata) {
+    for (int i = 0; i < gamedata->rows; i++) {
+        free(gamedata->grid[i]);
     }
-    free(grid);
-    free(grid);
+    free(gamedata->grid);
 }
