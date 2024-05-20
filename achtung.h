@@ -3,17 +3,24 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #define BITE_SIZE 8
 
-#define MIN_SIZE 5
-#define MAX_SIZE 20
-#define MIN_DENSITY 0.15
-#define MAX_DENSITY 0.85
+#define MIN_SIZE 8
+#define MAX_SIZE 25
+#define MIN_DENSITY 0.05
+#define MAX_DENSITY 0.5
 
-#define MINE 256
-#define FLAG_BIT 1 << (BITE_SIZE*sizeof(int)-1)
+#define EMPTY 0
+#define MINE 64
+#define FLAG_BIT (unsigned int) (1 << (BITE_SIZE*sizeof(int)-1))
+#define REVEAL_BIT (unsigned int) (1 << (BITE_SIZE*sizeof(int)-2))
+#define VALUE_MASK (unsigned int) (REVEAL_BIT - 1)
+#define BLOWN_UP (unsigned int) (MINE | REVEAL_BIT)
+
+#define MAX_ITER (int) 1e6
 
 typedef struct {
     int** grid;
@@ -21,13 +28,18 @@ typedef struct {
     int mine_count;
 } Gamedata;
 
+typedef struct {
+    int i, j;
+} Point;
+
 void print_grid(Gamedata);
+int reveal(Gamedata*, Point);
+void flag(Gamedata*, Point);
 
-void init_grid(Gamedata*);
-void lay_mines(Gamedata*);
 void set_neighbors(Gamedata*);
+int init_grid(Gamedata*, Point);
 
-int malloc_grid(Gamedata*, int rows, int cols, float density);
+int malloc_grid(Gamedata*, float);
 void free_grid(Gamedata*);
 
 
