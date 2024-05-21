@@ -1,31 +1,82 @@
 #include "achtung.h"
 
-void print_grid(Gamedata gamedata) {
+void print_grid(Gamedata gamedata, Point selected) {
+    printf(WALL_COLOR "+");
+    for (int i = 0; i < gamedata.cols*3; i++) {
+        printf("-");
+    }
+    puts("+" RESET);
+
     for (int i = 0; i < gamedata.rows; i++) {
+        printf(WALL_COLOR "|" RESET);
         for (int j = 0; j < gamedata.cols; j++) {
+            if (i == selected.i && j == selected.j) {
+                printf(SELECT_COLOR ">" RESET);
+            } else {
+                printf(" ");
+            }
             if (gamedata.grid[i][j] & REVEAL_BIT) {
-                if (gamedata.grid[i][j] & MINE) {
-                    printf("_X_");
+                if (gamedata.grid[i][j] == (MINE | REVEAL_BIT)) {
+                    printf(MINE_COLOR "X" RESET);
+                } else if (gamedata.grid[i][j] == (MINE | FLAG_BIT | REVEAL_BIT)) {
+                    printf(FLAG_COLOR "X" RESET);
+                } else if (gamedata.grid[i][j] == (EMPTY | REVEAL_BIT)) {
+                    printf(" ");
+                } else if (gamedata.grid[i][j] & FLAG_BIT) {
+                    printf(MINE_COLOR "%d" RESET, gamedata.grid[i][j] & VALUE_MASK);
                 } else {
-                    printf("_%d_", gamedata.grid[i][j] & VALUE_MASK);
+                    printf("%d", gamedata.grid[i][j] & VALUE_MASK);
                 }
             } else if (gamedata.grid[i][j] & FLAG_BIT) {
-                printf(" F ");
+                printf(FLAG_COLOR "F" RESET);
             } else {
-                if (gamedata.grid[i][j] & MINE) {
-                    printf(" * ");
-                } else {
-                    printf(" %d ", gamedata.grid[i][j] & VALUE_MASK);
-                }
+                printf("?");
+                // if (gamedata.grid[i][j] & MINE) {
+                //     printf(" * ");
+                // } else {
+                //     printf(" %d ", gamedata.grid[i][j] & VALUE_MASK);
+                // }
+            }
+            if (i == selected.i && j == selected.j) {
+                printf(SELECT_COLOR "<" RESET);
+            } else {
+                printf(" ");
             }
         }
-        printf("\n");
+        puts(WALL_COLOR "|" RESET);
     }
+
+    printf(WALL_COLOR "+");
+    for (int i = 0; i < gamedata.cols*3; i++) {
+        printf("-");
+    }
+    puts("+" RESET);
+}
+
+int check_win_condition(Gamedata gamedata) {
+    int revealed_count = 0;
+    for (int i = 0; i < gamedata.rows; i++) {
+        for (int j = 0; j < gamedata.cols; j++) {
+            if (gamedata.grid[i][j] == (MINE | REVEAL_BIT)) return 0;
+            if (gamedata.grid[i][j] & REVEAL_BIT) revealed_count++;
+        }
+    }
+    int flagged_mine_count = 0;
+    for (int i = 0; i < gamedata.rows; i++) {
+        for (int j = 0; j < gamedata.cols; j++) {
+            if (gamedata.grid[i][j] == (MINE | FLAG_BIT)) flagged_mine_count++;
+        }
+    }
+    int win = (revealed_count + flagged_mine_count) == (gamedata.rows * gamedata.cols);
+    return win;
 }
 
 int reveal(Gamedata* gamedata, Point p) {
     if (gamedata->grid[p.i][p.j] & FLAG_BIT) return 0;
-    if (gamedata->grid[p.i][p.j] == MINE) return 1;
+    if (gamedata->grid[p.i][p.j] == MINE) {
+        _reveal_all(gamedata);
+        return 1;
+    }
 
     gamedata->grid[p.i][p.j] |= REVEAL_BIT;
     if ((gamedata->grid[p.i][p.j] & VALUE_MASK) != EMPTY) return 0;
@@ -45,6 +96,14 @@ int reveal(Gamedata* gamedata, Point p) {
         }
     }
     return 0;
+}
+
+void _reveal_all(Gamedata* gamedata) {
+    for (int i = 0; i < gamedata->rows; i++) {
+        for (int j = 0; j < gamedata->cols; j++) {
+            gamedata->grid[i][j] |= REVEAL_BIT;
+        }
+    }
 }
 
 void flag(Gamedata* gamedata, Point p) {

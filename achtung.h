@@ -6,6 +6,8 @@
 #include <string.h>
 #include <time.h>
 
+#include "term_manip.h"
+
 #define BITE_SIZE 8
 
 #define MIN_SIZE 8
@@ -18,9 +20,13 @@
 #define FLAG_BIT (unsigned int) (1 << (BITE_SIZE*sizeof(int)-1))
 #define REVEAL_BIT (unsigned int) (1 << (BITE_SIZE*sizeof(int)-2))
 #define VALUE_MASK (unsigned int) (REVEAL_BIT - 1)
-#define BLOWN_UP (unsigned int) (MINE | REVEAL_BIT)
 
 #define MAX_ITER (int) 1e6
+
+#define WALL_COLOR CYAN
+#define MINE_COLOR RED
+#define FLAG_COLOR GREEN
+#define SELECT_COLOR YELLOW
 
 typedef struct {
     int** grid;
@@ -32,8 +38,11 @@ typedef struct {
     int i, j;
 } Point;
 
-void print_grid(Gamedata);
+void print_grid(Gamedata, Point);
+int check_win_condition(Gamedata);
+
 int reveal(Gamedata*, Point);
+void _reveal_all(Gamedata*);
 void flag(Gamedata*, Point);
 
 void set_neighbors(Gamedata*);
