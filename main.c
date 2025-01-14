@@ -29,6 +29,7 @@ int main(int argc, char* argv[]) {
     handle_malloc(malloc_grid(&game, density));
 
     // first reveal
+    printf(BACKGROUND);
     while (!has_selected_first && run) {
         printf(FLUSH);
         print_grid(game, selected);
@@ -78,15 +79,19 @@ void handle_input(char c) {
             }
             break;
         case 'w':
+        case 'k':
             selected.i = (selected.i - 1 + game.rows) % game.rows;
             break;
         case 's':
+        case 'j':
             selected.i = (selected.i + 1) % game.rows;
             break;
         case 'a':
+        case 'h':
             selected.j = (selected.j - 1 + game.cols) % game.cols;
             break;
         case 'd':
+        case 'l':
             selected.j = (selected.j + 1) % game.cols;
             break;
         case ' ':
@@ -119,7 +124,7 @@ void read_args(int argc, char* argv[]) {
     }
     if (density < MIN_DENSITY || density > MAX_DENSITY) {
         printf("Invalid density\n");
-        printf("Density must be between %f and %f\n", MIN_DENSITY, MAX_DENSITY);
+        printf("Density must be between %0.2f and %0.2f\n", MIN_DENSITY, MAX_DENSITY);
         printf("Closing due to parameter error\n");
         exit(1);
     }
@@ -137,7 +142,7 @@ void read_params() {
             times_read++;
         } else if (density < MIN_DENSITY || density > MAX_DENSITY) {
             printf("Invalid density\n");
-            printf("Density must be between %f and %f\n", MIN_DENSITY, MAX_DENSITY);
+            printf("Density must be between %.2f and %.1f\n", MIN_DENSITY, MAX_DENSITY);
             times_read++;
         } else {
             break;

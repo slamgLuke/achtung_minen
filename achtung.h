@@ -23,11 +23,6 @@
 
 #define MAX_ITER (int) 1e6
 
-#define WALL_COLOR CYAN
-#define MINE_COLOR RED
-#define FLAG_COLOR GREEN
-#define SELECT_COLOR YELLOW
-
 typedef struct {
     int** grid;
     int rows, cols;

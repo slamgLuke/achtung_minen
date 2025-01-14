@@ -5,32 +5,34 @@ void print_grid(Gamedata gamedata, Point selected) {
     for (int i = 0; i < gamedata.cols*3; i++) {
         printf("-");
     }
-    puts("+" RESET);
+    puts("+");
 
     for (int i = 0; i < gamedata.rows; i++) {
-        printf(WALL_COLOR "|" RESET);
+        printf(WALL_COLOR "|");
         for (int j = 0; j < gamedata.cols; j++) {
             if (i == selected.i && j == selected.j) {
-                printf(SELECT_COLOR ">" RESET);
+                printf(SELECT_COLOR ">");
             } else {
                 printf(" ");
             }
             if (gamedata.grid[i][j] & REVEAL_BIT) {
                 if (gamedata.grid[i][j] == (MINE | REVEAL_BIT)) {
-                    printf(MINE_COLOR "X" RESET);
+                    printf(MINE_COLOR "X");
                 } else if (gamedata.grid[i][j] == (MINE | FLAG_BIT | REVEAL_BIT)) {
-                    printf(FLAG_COLOR "X" RESET);
+                    printf(FLAG_COLOR "X");
                 } else if (gamedata.grid[i][j] == (EMPTY | REVEAL_BIT)) {
                     printf(" ");
                 } else if (gamedata.grid[i][j] & FLAG_BIT) {
-                    printf(MINE_COLOR "%d" RESET, gamedata.grid[i][j] & VALUE_MASK);
+                    printf(MINE_COLOR "%d", gamedata.grid[i][j] & VALUE_MASK);
                 } else {
+                    num_color(gamedata.grid[i][j] & VALUE_MASK);
                     printf("%d", gamedata.grid[i][j] & VALUE_MASK);
                 }
             } else if (gamedata.grid[i][j] & FLAG_BIT) {
-                printf(FLAG_COLOR "F" RESET);
+                printf(FLAG_COLOR "F");
             } else {
-                printf("?");
+                if (i % 2 == 0) printf(BASIC "\u2588");
+                else printf(BASIC "\u2593");
                 // if (gamedata.grid[i][j] & MINE) {
                 //     printf(" * ");
                 // } else {
@@ -38,19 +40,19 @@ void print_grid(Gamedata gamedata, Point selected) {
                 // }
             }
             if (i == selected.i && j == selected.j) {
-                printf(SELECT_COLOR "<" RESET);
+                printf(SELECT_COLOR "<");
             } else {
                 printf(" ");
             }
         }
-        puts(WALL_COLOR "|" RESET);
+        puts(WALL_COLOR "|");
     }
 
     printf(WALL_COLOR "+");
     for (int i = 0; i < gamedata.cols*3; i++) {
         printf("-");
     }
-    puts("+" RESET);
+    puts("+");
 }
 
 int check_win_condition(Gamedata gamedata) {
